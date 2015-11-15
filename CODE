@@ -1,0 +1,345 @@
+function map
+%%
+%Morphogenetic bots
+clear;
+clc;
+C=[];
+tic;
+time_stamp = zeros(100,100);
+n = input('Please enter the desired number of bot(enter only values between 6 - 20 =  ');
+[rr cc] = meshgrid(1:100);
+C = (sqrt((rr-60).^2+(cc-50).^2) <=5)+1 ;
+
+colormap([1,1,1;0,0,0;1,0,0]);
+
+t = 2;
+
+botx = round((98-1).*rand(n,1)+1);
+   
+boty(1:n/2) = round((98-1).*rand(n/2,1)+1);
+boty((n/2+1):n) = round((100-80).*rand(n/2,1)+80);
+bot_coor = [];
+last_coor= [];
+time_stamp = C;
+
+for i=1:n
+    
+    C(botx(i),boty(i)) = 3;
+    time_stamp(botx(i),boty(i)) = t;
+    bot_coor(i,1) = botx(i);
+    bot_coor(i,2) = boty(i);
+end
+
+image(C);
+
+
+dist=zeros(n,n);
+
+counter = 1;
+reached = zeros(1,n);  %depends on bots
+lastx_coor =  botx;
+lasty_coor = boty;
+first_run  = zeros(1,n)+1 ;        % depends on no. of bots
+while nnz(reached) ~= n        % depends on the no. of bots
+    
+    for i= 1:n
+        initialx=botx(i);initialy=boty(i);
+        if  C(botx(i)+1,boty(i))== 2 ||    C(botx(i)-1,boty(i)) == 2 ||  C(botx(i),boty(i)+1) == 2 ||  C(botx(i),boty(i)-1) == 2 ||   C(botx(i)+1,boty(i)+1)== 2 ||  C(botx(i)+1,boty(i)- 1) == 2 ||         C(botx(i)-1,boty(i)- 1)== 2 ||  C(botx(i)-1,boty(i)+ 1) == 2 || nnz(reached(i))
+            if reached(i) == 0   && botx(i)< 99 && botx(i) > 1 && boty(i) < 99 && boty(i) > 1
+                reached(i) =counter;     %% keeps track of the sequence in which the bots reached the target
+                counter= counter + 1;
+            end
+            
+            continue;
+            
+        end
+        
+        % Find  nearest bot and which has also reached the target
+        for k=1:n   % 10 should be replaced by n i.e. no of bots
+            for j = 1:n
+                if k==j
+                    dist(k,j) = 100+1       ;                     % make it 1 plus lattice dimension
+                else
+                    dist(k,j)= max(abs(botx(k)-botx(j)), abs(boty(k)-boty(j)))-1;
+                end
+            end
+            
+        end
+        initialx=botx(i);initialy=boty(i);
+        [val nearest] = min(dist(i,:));
+        
+        if abs(botx(i)-botx(nearest)) > 4 ||     abs(boty(i)-boty(nearest)) > 4 ||  reached(nearest) ~= 1
+            if abs(botx(i)-50) > 5
+                botx(i)=botx(i)+(botx(i)-50)/abs(botx(i)-50)*(-1);
+                
+            end
+            if abs(boty(i)-60) > 5
+                boty(i)= boty(i)+(boty(i)-60)/abs(boty(i)-60)*(-1);
+                
+            end
+            
+            
+            if abs(botx(i)-50) <= 5 && abs(boty(i)-60) <= 5
+                if reached(i) == 0
+                    reached(i) =counter;                 %% keeps track of the sequence in which the bots reached the target
+                    counter= counter + 1;
+                end
+            end
+            C(initialx,initialy)=1;
+            
+            
+            C(botx(i),boty(i))=3;
+            time_stamp(botx(i),boty(i)) = t;
+            bot_coor(i,1) = botx(i);
+            bot_coor(i,2) = boty(i);
+            
+            image(C); pause(0.001);
+            
+        else
+            
+            % if nnz(reached(nearest))
+            if nnz(reached(nearest) ) && boty(nearest) < 60 && botx(nearest) <50
+                if botx(i) - botx(nearest) >= 0
+                    boty(i)= boty(i) + 1;
+                elseif botx(nearest) - botx(i) >=1 && botx(nearest) - botx(i) <=4
+                    botx(i)= botx(i) + 1;
+                else
+                    boty(i)= boty(i) +1;
+                    
+                end
+            elseif nnz(reached(nearest) )&& boty(nearest) > 60 && botx(nearest) <50
+                if boty(nearest)- boty(i) >= 0
+                    boty(i) = boty(i) - 1;
+                elseif  boty(i) - boty(nearest) >= 1 && boty(i) - boty(nearest) <= 4
+                    boty(i) = boty(i) - 1;
+                else
+                    botx(i) = botx(i) + 1;
+                end
+            elseif  nnz(reached(nearest) )&& boty(nearest) > 60 && botx(nearest) > 50
+                if botx(nearest)- botx(i) >= 0
+                    botx(i) = botx(i) + 1;
+                elseif botx(i) - botx(nearest) >= 1 && botx(i) - botx(nearest) <= 4
+                    
+                    boty(i) = boty(i) - 1;
+                else
+                    
+                    boty(i) = boty(i) - 1;
+                end
+            elseif nnz(reached(nearest) ) && boty(nearest) < 60 && botx(nearest) > 50
+                if  boty(i)- boty(nearest) >= 0
+                    boty(i) = boty(i) + 1;
+                elseif   boty(nearest)- boty(i) >= 0 && boty(nearest)- boty(i) <= 4
+                    boty(i) = boty(i) + 1;
+                else
+                    botx(i) = botx(i) - 1;
+                end
+            end
+            %             C(initialx,initialy)=1;
+            %             C(botx(i),boty(i))=3;
+            %             bot_coor(i,1) = botx(i);
+            %             bot_coor(i,2) = boty(i);
+            %             image(C); pause(0.001);
+            
+            
+            
+            
+            %%% C(botx(i)+1,boty(i))    C(botx(i)-1,boty(i))  C(botx(i),boty(i)+1)  C(botx(i),boty(i)-1)
+            %%%   C(botx(i)+1,boty(i)+1) C(botx(i)+1,boty(i)- 1) C(botx(i)-1,boty(i)- 1) C(botx(i)+1,boty(i)+ 1)
+            C(initialx,initialy)=1;
+            
+            
+            C(botx(i),boty(i))=3;
+            time_stamp(botx(i),boty(i)) = t;
+            bot_coor(i,1) = botx(i);
+            bot_coor(i,2) = boty(i);
+            
+            image(C); 
+        end
+    end
+    
+end
+
+
+
+settled=zeros(1,n);
+cnt = 1;
+while ( 1==1)
+    
+    % Find  nearest bot and which has also reached the target
+    for k=1:n   % 10 should be replaced by n i.e. no of bots
+        for j = 1:n
+            if k==j
+                dist2(k,j) = 100+1       ;                     % make it 1 plus lattice dimension
+            else
+                dist2(k,j)= max(abs(botx(k)-botx(j)), abs(boty(k)-boty(j)));
+            end
+        end
+        
+    end
+     for i = 1:n
+        if nnz(settled(i))
+            continue;
+        else
+            flag = 0;
+            [val nearest2] = min(dist2(i,:));
+            initialx=botx(nearest2);initialy=boty(nearest2);
+            if botx(nearest2)== botx(i) && boty(nearest2) == boty(i)
+                flag = 1;
+            end 
+            while  max(abs(botx(i)-botx(nearest2)), abs(boty(i)-boty(nearest2))) < 4 && ~nnz(settled(nearest2))
+                if botx(i) < 50 && boty(i) < 60          %bot i is in quadrant 1
+                    if botx(nearest2) < botx(i)                    % the nearest2 neighbour is in the same quadrant
+                        
+                        if  C(botx(nearest2),boty(nearest2)+1) == 2
+                            botx(nearest2) = botx(nearest2) - 1;
+                        elseif C(botx(nearest2),boty(nearest2) +2) ==2
+                            botx(nearest2) = botx(nearest2) - 1;
+                        elseif C(botx(nearest2)+1,boty(nearest2)+1) == 2
+                            boty(nearest2) = boty(nearest2) + 1;
+                        elseif C( botx(nearest2)+2,boty(nearest2)+2) == 2
+                            boty(nearest2) = boty(nearest2) +1 ;
+                        elseif C(botx(nearest2) + 1, boty(nearest2) ) == 2
+                            botx(nearest2)  = botx(nearest2) + 1;
+                        elseif C(botx(nearest2) + 2, boty(nearest2)) == 2
+                            botx(nearest2) = botx(nearest2) + 1;
+                        end
+                    elseif botx(nearest2) >= botx(i)
+                        if C(botx(nearest2),boty(nearest2) +1) == 2
+                            botx(nearest2) = botx(nearest2) + 1;
+                        elseif C(botx(nearest2),boty(nearest2)+2) ==2
+                            botx(nearest2) = botx(nearest2)+ 1;
+                        elseif C(botx(nearest2)-1,boty(nearest2) + 1) ==2
+                            boty(nearest2) = boty(nearest2) + 1;
+                        elseif C( botx(nearest2) +2,boty(nearest2) + 2) == 2
+                            boty(nearest2) = boty(nearest2) + 1;
+                        elseif C(botx(nearest2) -1 , boty(nearest2)) ==2
+                            boty(nearest2) = boty(nearest2) + 1;
+                        elseif C(botx(nearest2) - 2, boty(nearest2)) == 2
+                            boty(nearest2)= boty(nearest2) + 1;
+                        end
+                    end
+                    
+                elseif botx(i) < 50 && boty(i) >= 60                   % quadrant II
+                    if botx(nearest2) < botx(i)                    % the nearest2 neighbour is in the same quadrant
+                        
+                        if  C(botx(nearest2),boty(nearest2)-1) == 2
+                            botx(nearest2) = botx(nearest2) - 1;
+                        elseif C( botx(nearest2),boty(nearest2) -2) ==2
+                            botx(nearest2) = botx(nearest2) - 1;
+                        elseif C(botx(nearest2)+1,boty(nearest2)-1) == 2
+                            boty(nearest2) = boty(nearest2) - 1;
+                        elseif C( botx(nearest2)+2,boty(nearest2)-2) == 2
+                            boty(nearest2) = boty(nearest2) -1 ;
+                        elseif C(botx(nearest2) + 1, boty(nearest2) ) == 2
+                            boty(nearest2)  = boty(nearest2) - 1;
+                        elseif C(botx(nearest2) + 2, boty(nearest2)) == 2
+                            boty(nearest2) = boty(nearest2) - 1;
+                        end
+                    elseif botx(nearest2) >= botx(i)
+                        if C( botx(nearest2),boty(nearest2) -1 ) == 2
+                            botx(nearest2) = botx(nearest2) + 1;
+                        elseif C( botx(nearest2),boty(nearest2)-2) ==2
+                            botx(nearest2) = botx(nearest2)+ 1;
+                        elseif C(botx(nearest2)-1,boty(nearest2) - 1) ==2
+                            boty(nearest2) = boty(nearest2) - 1;
+                        elseif C(botx(nearest2) -2,boty(nearest2) - 2) == 2
+                            boty(nearest2) = boty(nearest2) - 1;
+                        elseif C(botx(nearest2) -1 , boty(nearest2)) ==2
+                            boty(nearest2) = boty(nearest2) - 1;
+                        elseif C(botx(nearest2) - 2, boty(nearest2)) == 2
+                            boty(nearest2)= boty(nearest2) - 1;
+                        end
+                    end
+                    
+                elseif botx(i) >= 50 && boty(i) >= 60                   % quadrant III
+                    if botx(i)  > botx(nearest2)
+                        if  C(botx(nearest2),boty(nearest2)-1) == 2
+                            botx(nearest2) = botx(nearest2) - 1;
+                        elseif C(botx(nearest2),boty(nearest2) -2) ==2
+                            botx(nearest2) = botx(nearest2) - 1;
+                        elseif C(botx(nearest2)+1,boty(nearest2)-1) == 2
+                            boty(nearest2) = boty(nearest2) - 1;
+                        elseif C(botx(nearest2)+2,boty(nearest2)-2) == 2
+                            boty(nearest2) = boty(nearest2) -1 ;
+                        elseif C(botx(nearest2) + 1, boty(nearest2) ) == 2
+                            boty(nearest2)  = boty(nearest2) - 1;
+                        elseif C(botx(nearest2) + 2, boty(nearest2)) == 2
+                            boty(nearest2) = boty(nearest2) - 1;
+                        end
+                    elseif botx(nearest2) >= botx(i)
+                        if  C(botx(nearest2),boty(nearest2)-1) == 2
+                            botx(nearest2) = botx(nearest2) + 1;
+                        elseif C(botx(nearest2),boty(nearest2) -2) ==2
+                            botx(nearest2) = botx(nearest2) + 1;
+                        elseif C(botx(nearest2)-1,boty(nearest2)-1) == 2
+                            boty(nearest2) = boty(nearest2) - 1;
+                        elseif C(botx(nearest2)-2,boty(nearest2)-2) == 2
+                            boty(nearest2) = boty(nearest2) -1 ;
+                        elseif C(botx(nearest2) - 1, boty(nearest2) ) == 2
+                            boty(nearest2)  = boty(nearest2) - 1;
+                        elseif C(botx(nearest2) - 2, boty(nearest2)) == 2
+                            boty(nearest2) = boty(nearest2) - 1;
+                        end
+                    end
+                    
+                    
+                elseif botx(i) >= 50 && boty(i) < 60       % quadrant IV
+                    if botx(i)  > botx(nearest2)
+                        if  C(botx(nearest2),boty(nearest2)+1) == 2
+                            botx(nearest2) = botx(nearest2) - 1;
+                        elseif C( botx(nearest2),boty(nearest2) +2) ==2
+                            botx(nearest2) = botx(nearest2) - 1;
+                        elseif C(botx(nearest2)+1,boty(nearest2)+1) == 2
+                            boty(nearest2) = boty(nearest2) + 1;
+                        elseif C( botx(nearest2)+2,boty(nearest2)+2) == 2
+                            boty(nearest2) = boty(nearest2) +1 ;
+                        elseif C(botx(nearest2) + 1, boty(nearest2) ) == 2
+                            boty(nearest2)  = boty(nearest2) + 1;
+                        elseif C(botx(nearest2) + 2, boty(nearest2)) == 2
+                            boty(nearest2) = boty(nearest2) + 1;
+                        end
+                    elseif botx(nearest2) >= botx(i)
+                        if  C(botx(nearest2),boty(nearest2)+1) == 2
+                            botx(nearest2) = botx(nearest2) + 1;
+                        elseif C( botx(nearest2),boty(nearest2) +2) ==2
+                            botx(nearest2) = botx(nearest2) + 1;
+                        elseif C(botx(nearest2)-1,boty(nearest2)+1) == 2
+                            boty(nearest2) = boty(nearest2) + 1;
+                        elseif C( botx(nearest2)-2,boty(nearest2)+2) == 2
+                            boty(nearest2) = boty(nearest2) +1 ;
+                        elseif C(botx(nearest2) + 1, boty(nearest2) ) == 2
+                            boty(nearest2)  = boty(nearest2) + 1;
+                        elseif C(botx(nearest2) + 2, boty(nearest2)) == 2
+                            boty(nearest2) = boty(nearest2) + 1;
+                        end
+                    end
+                end
+                if flag == 1
+                C(botx(nearest2),boty(nearest2))=3;
+                % time_stamp(botx(i),boty(i)) = t;
+                bot_coor(i,1) = botx(i);
+                bot_coor(i,2) = boty(i);
+                image(C); pause(0.001);    
+                else
+                C(initialx,initialy)=1;
+                
+                
+                C(botx(nearest2),boty(nearest2))=3;
+                % time_stamp(botx(i),boty(i)) = t;
+                bot_coor(i,1) = botx(i);
+                bot_coor(i,2) = boty(i);
+                image(C); pause(0.001);
+                end
+            end
+            settled(i) = cnt;
+           % settled(nearest2) = cnt;
+            
+            cnt = cnt + 1;
+        end
+    end
+    
+    
+end
+toc;
+
+end
