@@ -1,6 +1,6 @@
 # Morphogenetic-Robot-Cameras
 Simulated Morphogenetic bots on MATLAB©
-Copyright (c) 2015, 'Gbenga Awodokun All rights reserved.
+Copyright (c) 2015, 'Gbenga Awodokun All rights reserved.  Currently re-writing all these codes in Java. If you prefer java, it would be available soon.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
